@@ -167,16 +167,12 @@ Urna_Eletronica/
 ├── data/
 │   ├── .gitkeep
 │   └── urna_eletronica.db       # criado em execução; não deve ir para o Git
-├── tests/
-│   ├── test_database.py         # testes de persistência e transações
-│   └── test_urna_eletronica.py  # testes das regras da urna
 ├── urna_app/
 │   ├── __init__.py              # API pública do pacote
 │   ├── core.py                  # modelos e regras de negócio
 │   ├── database.py              # esquema e operações SQLite
 │   ├── terminal.py              # interface e fluxo de terminal
 │   └── gui.py                   # interface Tkinter
-├── database.py                 # compatibilidade com imports antigos
 ├── urna_eletronica.py           # lançador do modo de terminal
 ├── visual_urna.py               # lançador da interface gráfica
 ├── README.md
@@ -184,14 +180,12 @@ Urna_Eletronica/
 ```
 
 O banco de execução e os arquivos temporários do Python são ignorados pelo Git.
-Os testes criam bancos descartáveis em diretórios temporários e não alteram os
-dados da aplicação.
 
 ## Como os módulos se relacionam
 
 ```text
 visual_urna.py ──> urna_app.gui ──────┐
-                                      ├──> urna_app.core.Urna ──> database.Database ──> SQLite
+                                      ├──> urna_app.core.Urna ──> urna_app.database.Database ──> SQLite
 urna_eletronica.py ──> urna_app.terminal ┘
 ```
 
@@ -205,8 +199,6 @@ urna_eletronica.py ──> urna_app.terminal ┘
   mantém uma implementação paralela das regras eleitorais.
 - **Lançadores na raiz** preservam os nomes de arquivo e comandos usados em
   versões anteriores.
-- **`tests/`** verifica regras, esquema, rollback, recuperação, segundo turno e
-  integridade usando bancos temporários.
 
 As conexões SQLite são abertas por operação, ativam chaves estrangeiras e são
 fechadas ao final. Operações compostas, como registrar um voto e a participação
@@ -255,24 +247,10 @@ detecção de alterações comuns. Não impede adulteração por alguém que con
 arquivo e o código e possa recalcular os hashes; SQLite e SHA-256 aqui não são
 uma proteção eleitoral certificada.
 
-## Testes
-
-No PowerShell, execute a partir da raiz do projeto:
+Para verificar a sintaxe dos módulos:
 
 ```powershell
-$env:PYTHONUTF8 = "1"
-python -m unittest discover -s tests -v
-```
-
-O `PYTHONUTF8` evita problemas de exibição de caracteres acentuados em alguns
-terminais Windows. Os testes cobrem persistência e reabertura, votos nominais,
-brancos e nulos, duplicidades, encerramento, rollback, segundo turno, chaves
-estrangeiras, parametrização SQL e adulteração da cadeia.
-
-Para verificar a sintaxe de todos os módulos:
-
-```powershell
-python -m py_compile database.py urna_eletronica.py visual_urna.py urna_app\__init__.py urna_app\core.py urna_app\database.py urna_app\terminal.py urna_app\gui.py tests\test_database.py tests\test_urna_eletronica.py
+python -m py_compile urna_eletronica.py visual_urna.py urna_app\__init__.py urna_app\core.py urna_app\database.py urna_app\terminal.py urna_app\gui.py
 ```
 
 ## Solução de problemas
